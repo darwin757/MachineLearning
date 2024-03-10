@@ -41,9 +41,15 @@ def predict(X):
 # Prediction on testing data
 predictions = predict(X_test)
 
-# Performance metrics
+# Performance metrics calculations
+def mean_absolute_error(y_true, y_pred):
+    return np.mean(np.abs(y_true - y_pred))
+
 def mean_squared_error(y_true, y_pred):
     return np.mean((y_true - y_pred) ** 2)
+
+def root_mean_squared_error(y_true, y_pred):
+    return np.sqrt(mean_squared_error(y_true, y_pred))
 
 def r_squared(y_true, y_pred):
     mean_y = np.mean(y_true)
@@ -52,9 +58,22 @@ def r_squared(y_true, y_pred):
     r2 = 1 - (ss_res / ss_tot)
     return r2
 
-# Calculating and displaying metrics
+def adjusted_r_squared(y_true, y_pred, n, k):
+    r2 = r_squared(y_true, y_pred)
+    adj_r2 = 1 - ((1 - r2) * (n - 1) / (n - k - 1))
+    return adj_r2
+
+
+# Number of observations and predictors
+n = len(y_test)  # Number of observations in the test set
+k = 1  # Number of predictors, in this case, 'Size'
+
+# Calculating metrics
+mae = mean_absolute_error(y_test, predictions)
 mse = mean_squared_error(y_test, predictions)
+rmse = root_mean_squared_error(y_test, predictions)
 r2 = r_squared(y_test, predictions)
+adj_r2 = adjusted_r_squared(y_test, predictions, n, k)
 
 # Creating DataFrame for neat display
 results_df = pd.DataFrame({
@@ -63,6 +82,11 @@ results_df = pd.DataFrame({
     'Predicted Price (Normalized)': predictions
 })
 
+# Creating a DataFrame to display the metrics
+metrics_df = pd.DataFrame({
+    'Metric': ['Mean Absolute Error (MAE)', 'Mean Squared Error (MSE)', 'Root Mean Squared Error (RMSE)', 'R-squared', 'Adjusted R-squared'],
+    'Value': [mae, mse, rmse, r2, adj_r2]
+})
+
 print(results_df)  # Print the DataFrame
-print(f"\nMean Squared Error (MSE): {mse}")
-print(f"R-squared (R²): {r2}")
+print(metrics_df)
