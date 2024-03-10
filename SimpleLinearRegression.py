@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd  # Import pandas for table formatting
 
 # Load data from CSV file
 data = np.genfromtxt('house_prices.csv', delimiter=',', skip_header=1)
@@ -55,6 +56,13 @@ def r_squared(y_true, y_pred):
 mse = mean_squared_error(y_test, predictions)
 r2 = r_squared(y_test, predictions)
 
-print(f"Predictions: {predictions}")
-print(f"Mean Squared Error (MSE): {mse}")
+# Creating DataFrame for neat display
+results_df = pd.DataFrame({
+    'Test Size (Normalized)': X_test,
+    'Actual Price (Normalized)': y_test,
+    'Predicted Price (Normalized)': predictions
+})
+
+print(results_df)  # Print the DataFrame
+print(f"\nMean Squared Error (MSE): {mse}")
 print(f"R-squared (R²): {r2}")
