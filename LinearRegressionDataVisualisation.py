@@ -74,17 +74,19 @@ def compute_gradient(x, y, w, b):
 
 # Perform gradient descent to learn parameters
 def gradient_descent(x, y, w_init, b_init, alpha, num_iters):
-    """Performs gradient descent to update w and b."""
     w = w_init
     b = b_init
     J_history = []
+    p_history = []  # To store the history of parameters
     for i in range(num_iters):
         dj_dw, dj_db = compute_gradient(x, y, w, b)
-        w -= alpha * dj_dw
-        b -= alpha * dj_db
-        if i % 100 == 0:
+        w = w - alpha * dj_dw
+        b = b - alpha * dj_db
+        if i % 100 == 0:  # Compute cost and parameters every 100 iterations
             J_history.append(compute_cost(x, y, w, b))
-    return w, b, J_history
+            p_history.append([w, b])
+    return w, b, J_history, p_history
+
 
 # Set hyperparameters and initialize parameters
 alpha = 0.01
@@ -93,7 +95,7 @@ w_init = 0
 b_init = 0
 
 # Run gradient descent
-w_final, b_final, J_history = gradient_descent(x_train_normalized, y_train_normalized, w_init, b_init, alpha, num_iters)
+w_final, b_final, J_history, p_history = gradient_descent(x_train_normalized, y_train_normalized, w_init, b_init, alpha, num_iters)
 
 print(f"Final parameters: w = {w_final}, b = {b_final}")
 
@@ -103,6 +105,33 @@ plt.plot(J_history)
 plt.xlabel('Iteration')
 plt.ylabel('Cost')
 plt.title('Cost Function During Gradient Descent')
+plt.show()
+
+# Prepare the meshgrid for contour plot based on w and b ranges
+w_range = np.linspace(-2, 4, 100)
+b_range = np.linspace(-5, 5, 100)
+W, B = np.meshgrid(w_range, b_range)
+
+# Compute cost for each combination of w and b
+Z = np.array([
+    compute_cost(x_train_normalized, y_train_normalized, w, b) 
+    for w, b in zip(np.ravel(W), np.ravel(B))
+]).reshape(W.shape)
+
+# Contour plot
+plt.figure(figsize=(12, 6))
+cp = plt.contour(W, B, Z, levels=np.logspace(-2, 3, 20), cmap='viridis')
+plt.colorbar(cp)
+plt.title('Cost Function Contour with Gradient Descent Path')
+plt.xlabel('Weight (w)')
+plt.ylabel('Bias (b)')
+
+# Extract w and b values from p_history
+w_values, b_values = zip(*p_history)
+# Overlay the gradient descent path
+plt.plot(w_values, b_values, 'r--', marker='x', label='Gradient Descent Path')
+plt.legend()
+
 plt.show()
 
 # Final Model Evaluation
