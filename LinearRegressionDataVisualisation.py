@@ -22,15 +22,15 @@ plt.show()
 w = np.random.rand()
 b = np.random.rand()
 
-# Model Representation
+# Predict the price of a house given its size
 def predict(x, w, b):
+    """Returns the model prediction for a given house size."""
     return w * x + b
 
 # Model prediction on normalized data
 y_pred = predict(x_train_normalized, w, b)
 
 # Graph Plotting for Model Representation
-# Plotting the model prediction with initial random parameters
 plt.scatter(x_train_normalized, y_train_normalized, marker='x', c='r', label='Normalized Actual Prices')
 plt.plot(x_train_normalized, y_pred, label='Model Prediction', color='blue')
 plt.title("Normalized House Sizes vs. Prices Prediction")
@@ -39,20 +39,16 @@ plt.ylabel("Normalized Price")
 plt.legend()
 plt.show()
 
+# Compute cost for linear regression
 def compute_cost(x, y, w, b): 
+    """Computes the cost function for given features, targets, and parameters."""
     m = x.shape[0]
     total_cost = (1 / (2 * m)) * np.sum((predict(x, w, b) - y) ** 2)
     return total_cost
 
-# Example usage of compute_cost
-w_example = 0.1
-b_example = 0.0
-cost_example = compute_cost(x_train_normalized, y_train_normalized, w_example, b_example)
-print(f"Example Cost with w = {w_example} and b = {b_example}: {cost_example}")
-
-# Visualizing the Cost Function with respect to w
-w_values = np.linspace(-2, 4, 50)  # Adjust range and density as needed
-cost_values = [compute_cost(x_train_normalized, y_train_normalized, w, b_example) for w in w_values]
+# Compute and plot the cost function with respect to w
+w_values = np.linspace(-2, 4, 50)
+cost_values = [compute_cost(x_train_normalized, y_train_normalized, w, b) for w in w_values]
 
 plt.figure()
 plt.plot(w_values, cost_values, label='Cost Function Curve')
@@ -62,20 +58,9 @@ plt.ylabel('Cost (J)')
 plt.legend()
 plt.show()
 
-# Contour plot for Cost with respect to w and b
-W, B = np.meshgrid(np.linspace(-2, 4, 100), np.linspace(-5, 5, 100))
-Z = np.array([compute_cost(x_train_normalized, y_train_normalized, w, b) for w, b in zip(np.ravel(W), np.ravel(B))])
-Z = Z.reshape(W.shape)
-
-plt.figure()
-cp = plt.contour(W, B, Z, levels=np.logspace(-2, 3, 20), cmap='viridis')
-plt.colorbar(cp)
-plt.title('Cost Function Contour')
-plt.xlabel('Weight (w)')
-plt.ylabel('Bias (b)')
-plt.show()
-
+# Compute gradient of the cost function
 def compute_gradient(x, y, w, b):
+    """Computes the gradient of the cost function with respect to parameters w and b."""
     m = x.shape[0]
     dj_dw = 0
     dj_db = 0
@@ -83,27 +68,27 @@ def compute_gradient(x, y, w, b):
         f_wb = w * x[i] + b
         dj_dw += (f_wb - y[i]) * x[i]
         dj_db += (f_wb - y[i])
-    dj_dw = dj_dw / m
-    dj_db = dj_db / m
+    dj_dw /= m
+    dj_db /= m
     return dj_dw, dj_db
 
+# Perform gradient descent to learn parameters
 def gradient_descent(x, y, w_init, b_init, alpha, num_iters):
+    """Performs gradient descent to update w and b."""
     w = w_init
     b = b_init
     J_history = []
     for i in range(num_iters):
         dj_dw, dj_db = compute_gradient(x, y, w, b)
-        w = w - alpha * dj_dw
-        b = b - alpha * dj_db
-        if i % 100 == 0:  # Compute cost every 100 iterations
+        w -= alpha * dj_dw
+        b -= alpha * dj_db
+        if i % 100 == 0:
             J_history.append(compute_cost(x, y, w, b))
     return w, b, J_history
 
-# Set hyperparameters
+# Set hyperparameters and initialize parameters
 alpha = 0.01
 num_iters = 1000
-
-# Initialize parameters
 w_init = 0
 b_init = 0
 
@@ -112,7 +97,7 @@ w_final, b_final, J_history = gradient_descent(x_train_normalized, y_train_norma
 
 print(f"Final parameters: w = {w_final}, b = {b_final}")
 
-# Plot the cost over iterations
+# Plot cost over iterations
 plt.figure()
 plt.plot(J_history)
 plt.xlabel('Iteration')
@@ -120,17 +105,16 @@ plt.ylabel('Cost')
 plt.title('Cost Function During Gradient Descent')
 plt.show()
 
-# Generate mesh grid for contour plot
-W, B = np.meshgrid(np.linspace(-2, 4, 100), np.linspace(-5, 5, 100))
-Z = np.array([compute_cost(x_train_normalized, y_train_normalized, w, b) for w, b in zip(np.ravel(W), np.ravel(B))])
-Z = Z.reshape(W.shape)
+# Final Model Evaluation
+# Reversing normalization to plot predictions vs. actual prices
+x_train_pred = np.linspace(x_train.min(), x_train.max(), 100)
+y_train_pred = predict((x_train_pred - np.mean(x_train)) / np.std(x_train), w_final, b_final) * np.std(y_train) + np.mean(y_train)
 
-# Contour plot for Cost with respect to w and b showing the optimization path
 plt.figure()
-cp = plt.contour(W, B, Z, levels=np.logspace(-2, 3, 20), cmap='viridis')
-plt.plot(w_final, b_final, 'r*', markersize=10)  # Mark the final parameters
-plt.colorbar(cp)
-plt.title('Cost Function Contour with Optimization Path')
-plt.xlabel('Weight (w)')
-plt.ylabel('Bias (b)')
+plt.scatter(x_train, y_train, marker='x', c='r', label='Actual Prices')
+plt.plot(x_train_pred, y_train_pred, label='Model Prediction', color='blue')
+plt.title("House Sizes vs. Prices Prediction")
+plt.xlabel("Size (square meters)")
+plt.ylabel("Price (euros)")
+plt.legend()
 plt.show()
