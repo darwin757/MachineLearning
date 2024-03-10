@@ -131,7 +131,45 @@ w_values, b_values = zip(*p_history)
 # Overlay the gradient descent path
 plt.plot(w_values, b_values, 'r--', marker='x', label='Gradient Descent Path')
 plt.legend()
+plt.show()
 
+# High learning rate
+high_alpha = 0.5
+high_iter = 1000
+
+# Run gradient descent with a high learning rate
+w_high, b_high, J_history_high, p_history_high = gradient_descent(x_train_normalized, y_train_normalized, w_init, b_init, high_alpha, high_iter)
+
+# Plotting the cost function over iterations to show divergence
+plt.figure()
+plt.plot(J_history_high, label=f'Learning Rate = {high_alpha}')
+plt.xlabel('Iteration')
+plt.ylabel('Cost')
+plt.title('Cost Function Divergence with High Learning Rate')
+plt.legend()
+plt.show()
+
+# Generate mesh grid for contour plot
+W, B = np.meshgrid(np.linspace(-10, 10, 100), np.linspace(-10, 10, 100))  # Example range adjustments
+Z = np.array([
+    compute_cost(x_train_normalized, y_train_normalized, w, b) 
+    for w, b in zip(np.ravel(W), np.ravel(B))
+])
+Z = Z.reshape(W.shape)
+
+
+# Contour plot for Cost with respect to w and b showing the divergence
+plt.figure(figsize=(12, 6))
+cp = plt.contour(W, B, Z, levels=np.logspace(-2, 5, 50), cmap='viridis')
+plt.colorbar(cp)
+plt.title('Cost Function Contour with Divergent Gradient Descent Path')
+plt.xlabel('Weight (w)')
+plt.ylabel('Bias (b)')
+
+# Extract w and b values from p_history_high for high learning rate
+w_values_high, b_values_high = zip(*p_history_high)
+plt.plot(w_values_high, b_values_high, 'r--', marker='x', label='Divergent Path (High Alpha)')
+plt.legend()
 plt.show()
 
 # Final Model Evaluation
