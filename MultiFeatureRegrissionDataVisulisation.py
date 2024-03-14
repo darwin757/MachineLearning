@@ -114,7 +114,7 @@ for feature_name in feature_names:
 price = df['Price'].values
 
 # Feature names excluding 'Price'
-feature_names = df.columns[:-1]  # Assuming the last column is 'Price'
+feature_names = df.columns[:-1]  # Exclude 'Price' from features
 
 # Plot each normalized feature against the Price
 for i, feature_name in enumerate(feature_names):
@@ -139,7 +139,6 @@ for i, feature in enumerate(features):
 plt.tight_layout()
 plt.show()
 
-# Assuming theta, X_norm, and df are already defined from previous steps
 # Extract just the normalized features (excluding the intercept term) for plotting
 X_norm_features = X_norm[:, 1:]
 
