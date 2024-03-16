@@ -78,34 +78,46 @@ df = pd.read_csv('house_prices_multivariate.csv')
 X = df.iloc[:, :-1].values  # All rows, all columns except the last
 y = df.iloc[:, -1].values   # All rows, last column
 
-# Create polynomial features
+# Split data into training and testing sets
+np.random.seed(42)
+m = len(y)
+shuffle_indices = np.random.permutation(np.arange(m))
+split_idx = int(m * 0.8)
+train_idx, test_idx = shuffle_indices[:split_idx], shuffle_indices[split_idx:]
+X_train, X_test = X[train_idx], X[test_idx]
+y_train, y_test = y[train_idx], y[test_idx]
+
+# Create polynomial features for both training and test sets
 degree = 2
-X_poly = add_polynomial_features(X, degree=degree)
+X_poly_train = add_polynomial_features(X_train, degree=degree)
+X_poly_test = add_polynomial_features(X_test, degree=degree)
 
-# Normalize polynomial features
-X_poly_normalized, _, _ = feature_normalize(X_poly)
+# Normalize polynomial features for both training and test sets
+X_poly_train_normalized, mu_train, sigma_train = feature_normalize(X_poly_train)
+X_poly_test_normalized = (X_poly_test - mu_train) / sigma_train
 
-# Add intercept term to normalized polynomial features
-X_poly_normalized = np.hstack([np.ones((X_poly_normalized.shape[0], 1)), X_poly_normalized])
+# Add intercept term to normalized polynomial features for both sets
+X_poly_train_normalized = np.hstack([np.ones((X_poly_train_normalized.shape[0], 1)), X_poly_train_normalized])
+X_poly_test_normalized = np.hstack([np.ones((X_poly_test_normalized.shape[0], 1)), X_poly_test_normalized])
 
 # Initialize fitting parameters for polynomial model
-theta_poly = np.zeros(X_poly_normalized.shape[1])
+theta_poly = np.zeros(X_poly_train_normalized.shape[1])
 
 # Some gradient descent settings
 iterations = 1000
 alpha = 0.01
 
-# Run gradient descent for polynomial regression
-theta_poly, J_history_poly = gradient_descent(X_poly_normalized, y, theta_poly, alpha, iterations)
+# Run gradient descent for polynomial regression on the training set
+theta_poly, J_history_poly = gradient_descent(X_poly_train_normalized, y_train, theta_poly, alpha, iterations)
 
-# Predict values for polynomial regression
-y_pred_poly = predict(X_poly_normalized, theta_poly)
+# Predict values for polynomial regression on the test set
+y_pred_poly_test = predict(X_poly_test_normalized, theta_poly)
 
-# Compute and print metrics for Polynomial Regression
-mae_poly, mse_poly, rmse_poly, r2_poly, adj_r2_poly = compute_metrics(y, y_pred_poly, X_poly_normalized)
-print(f"Polynomial Regression Metrics:\n MAE: {mae_poly:.4f}\n MSE: {mse_poly:.4f}\n RMSE: {rmse_poly:.4f}\n R-squared: {r2_poly:.4f}\n Adjusted R-squared: {adj_r2_poly:.4f}\n")
+# Compute and print metrics for Polynomial Regression on the test set
+mae_poly, mse_poly, rmse_poly, r2_poly, adj_r2_poly = compute_metrics(y_test, y_pred_poly_test, X_poly_test_normalized)
+print(f"Polynomial Regression Metrics (Test Set):\n MAE: {mae_poly:.4f}\n MSE: {mse_poly:.4f}\n RMSE: {rmse_poly:.4f}\n R-squared: {r2_poly:.4f}\n Adjusted R-squared: {adj_r2_poly:.4f}\n")
 
-# Visualizing cost decrease
+# Visualizing cost decrease over iterations
 plt.figure(figsize=(12, 6))
 plt.plot(range(iterations), J_history_poly, label='Polynomial Regression', color='orange')
 plt.title(f'Polynomial Regression (degree {degree}) Training Convergence')
@@ -114,24 +126,24 @@ plt.ylabel('Cost J')
 plt.legend()
 plt.show()
 
-# Plotting Actual vs. Predicted Prices for polynomial regression
+# Plotting Actual vs. Predicted Prices for polynomial regression on the test set
 plt.figure(figsize=(14, 7))
-plt.scatter(y, y, alpha=0.5, label='Actual', color='grey')
-plt.scatter(y, y_pred_poly, alpha=0.5, color='orange', label='Predicted')
-plt.title('Polynomial Regression\nActual vs. Predicted Prices on Normalized Data')
+plt.scatter(y_test, y_test, alpha=0.5, label='Actual', color='grey')
+plt.scatter(y_test, y_pred_poly_test, alpha=0.5, color='orange', label='Predicted')
+plt.title('Polynomial Regression\nActual vs. Predicted Prices on Test Set')
 plt.xlabel('Actual Prices')
 plt.ylabel('Predicted Prices')
 plt.legend()
 plt.tight_layout()
 plt.show()
 
-# Plot predictions against each feature
-feature_names = ['Size', 'Bedrooms', 'Age', 'Bathrooms', 'DistanceToCityCenter', 'SizePerBedroom']
-for i in range(X.shape[1]):
+# Plotting predictions against each feature for the test set
+feature_names = df.columns[:-1]  # All column names except the last one
+for i in range(X_test.shape[1]):
     plt.figure(figsize=(14, 7))
-    plt.scatter(X[:, i], y, alpha=0.8, label='Actual Prices', color='grey')
-    plt.scatter(X[:, i], y_pred_poly, alpha=0.6, label='Predicted Prices', color='orange')
-    plt.title(f'Polynomial Regression\n{feature_names[i]} vs. Price')
+    plt.scatter(X_test[:, i], y_test, alpha=0.8, label='Actual Prices', color='grey')
+    plt.scatter(X_test[:, i], y_pred_poly_test, alpha=0.6, label='Predicted Prices', color='orange')
+    plt.title(f'Polynomial Regression\n{feature_names[i]} vs. Price (Test Set)')
     plt.xlabel(feature_names[i])
     plt.ylabel('Price')
     plt.legend()
