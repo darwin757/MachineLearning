@@ -19,7 +19,6 @@ def feature_normalize(X):
     X_mean = X - mu
     return X_norm, mu, sigma, X_mean
 
-
 X = df.iloc[:, :-1].values  # Exclude the last column (target variable)
 y = df.iloc[:, -1].values.reshape(-1,1)  # Ensure y is a column vector
 X = X_df.values
@@ -28,6 +27,14 @@ X_norm, mu, sigma, X_mean = feature_normalize(X)
 # Adding intercept term
 m = len(y)
 X_norm = np.concatenate([np.ones((m, 1)), X_norm], axis=1)
+
+# Split data into training and testing sets
+np.random.seed(42)
+shuffle_indices = np.random.permutation(np.arange(m))
+split_idx = int(m * 0.8)
+train_idx, test_idx = shuffle_indices[:split_idx], shuffle_indices[split_idx:]
+X_train, X_test = X_norm[train_idx], X_norm[test_idx]
+y_train, y_test = y[train_idx], y[test_idx]
 
 # Compute Cost Function
 def compute_cost(X, y, theta):
@@ -45,12 +52,12 @@ def gradient_descent(X, y, theta, alpha, num_iters):
     return theta, J_history
 
 # Initialize fitting parameters
-theta = np.zeros((X_norm.shape[1], 1))
+theta = np.zeros((X_train.shape[1], 1))
 iterations = 1500
 alpha = 0.01
 
 # Run gradient descent
-theta, J_history = gradient_descent(X_norm, y, theta, alpha, iterations)
+theta, J_history = gradient_descent(X_train, y_train, theta, alpha, iterations)
 
 # Plot the convergence graph
 plt.plot(np.arange(len(J_history)), J_history, lw=2)
@@ -64,8 +71,8 @@ plt.show()
 def predict(X, theta):
     return X.dot(theta)
 
-# Generate predictions for the dataset
-predictions = predict(X_norm, theta)
+# Generate predictions for the test dataset
+predictions_test = predict(X_test, theta)
 
 # Plotting
 feature_names = X_df.columns
@@ -139,22 +146,21 @@ for i, feature in enumerate(features):
 plt.tight_layout()
 plt.show()
 
-# Extract just the normalized features (excluding the intercept term) for plotting
-X_norm_features = X_norm[:, 1:]
+# Predict target using normalized features for test dataset
+predictions_test = predict(X_test, theta).flatten()
 
-# Predict target using normalized features
-predictions = predict(X_norm, theta).flatten()
-
-# Plot predictions and targets versus original features
+# Plot predictions and targets versus original features for the test dataset
+df_test = df.iloc[test_idx]  # Creating a subset dataframe for test data
+feature_names = X_df.columns
 fig, ax = plt.subplots(1, len(feature_names), figsize=(20, 4), sharey=True)
 for i, feature_name in enumerate(feature_names):
-    ax[i].scatter(df[feature_name], y, label='Target', alpha=0.5, edgecolor='k')
-    ax[i].scatter(df[feature_name], predictions, label='Prediction', alpha=0.5, color='orange', edgecolor='k')
+    ax[i].scatter(df_test[feature_name], y_test, label='Target (Test)', alpha=0.5, edgecolor='k')
+    ax[i].scatter(df_test[feature_name], predictions_test, label='Prediction (Test)', alpha=0.5, color='orange', edgecolor='k')
     ax[i].set_xlabel(feature_name)
     if i == 0:
         ax[i].set_ylabel('Price ($)')
         ax[i].legend()
-fig.suptitle("Target vs. Prediction Using Z-score Normalized Model for Each Feature")
+fig.suptitle("Target vs. Prediction Using Z-score Normalized Model for Each Feature (Test Data)")
 plt.tight_layout()
 plt.show()
 
@@ -172,11 +178,11 @@ ax2.set_xlabel('Iteration step')
 plt.show()
 
 
-# Visualize Actual vs Predicted Prices for the entire dataset
+# Visualize Actual vs Predicted Prices for the test dataset
 plt.figure(figsize=(10, 6))
-plt.scatter(y, predictions, alpha=0.5)
-plt.title('Actual vs. Predicted Prices')
+plt.scatter(y_test, predictions_test, alpha=0.5)
+plt.title('Actual vs. Predicted Prices (Test Data)')
 plt.xlabel('Actual Price ($)')
 plt.ylabel('Predicted Price ($)')
-plt.plot([y.min(), y.max()], [y.min(), y.max()], 'k--', lw=4)
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=4)
 plt.show()
