@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Load the dataset
-df = pd.read_csv('house_prices_multivariate.csv')
+df = pd.read_csv('regression\house_prices_multivariate.csv')
 
 # Separate the features and the target variable
 X = df.drop('Price', axis=1).values

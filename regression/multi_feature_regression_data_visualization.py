@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load and display the dataset
-data_path = 'house_prices_multivariate.csv'  # Update this path
+data_path = 'regression\house_prices_multivariate.csv' 
 df = pd.read_csv(data_path)
 print(df.head())
 

@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load data from CSV file
-df = pd.read_csv('house_prices_multivariate.csv')
+df = pd.read_csv('regression\house_prices_multivariate.csv')
 
 # Separate features and target variable
 X = df.iloc[:, :-1].values  # All rows, all columns except the last

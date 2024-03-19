@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Load the data
-data = np.genfromtxt('house_prices.csv', delimiter=',', skip_header=1)
+data = np.genfromtxt('regression\house_prices.csv', delimiter=',', skip_header=1)
 x = data[:, 0]  # Size in square meters
 y = data[:, 1]  # Price in euros
 

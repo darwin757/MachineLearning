@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd  # Import pandas for table formatting
 
 # Load data from CSV file
-data = np.genfromtxt('house_prices.csv', delimiter=',', skip_header=1)
+data = np.genfromtxt('regression\house_prices.csv', delimiter=',', skip_header=1)
 X = data[:, 0]  # Size in square meters
 y = data[:, 1]  # Price in euros
 

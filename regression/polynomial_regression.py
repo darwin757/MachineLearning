@@ -72,7 +72,7 @@ def compute_metrics(y_true, y_pred, X):
     return mae, mse, rmse, r2, adj_r2
 
 # Load data from CSV file
-df = pd.read_csv('house_prices_multivariate.csv')
+df = pd.read_csv('regression\house_prices_multivariate.csv')
 
 # Separate features and target variable
 X = df.iloc[:, :-1].values  # All rows, all columns except the last
