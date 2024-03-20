@@ -19,6 +19,16 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
+
+# Visualize the distribution of each feature
+fig, ax = plt.subplots(5, 4, figsize=(20, 15))  # Adjust the subplot grid as needed
+ax = ax.ravel()
+for i in range(len(data.columns)-1):  # Exclude target column
+    ax[i].hist(data[data.columns[i]], bins=20, alpha=0.7)
+    ax[i].set_title(data.columns[i])
+plt.tight_layout()
+plt.show()
+
 # Define the logistic regression model
 class LogisticRegressionCustom:
     def __init__(self, learning_rate=0.01, num_iterations=1000, lambda_=0.01):
@@ -69,8 +79,49 @@ class LogisticRegressionCustom:
 # Train the custom logistic regression model
 model = LogisticRegressionCustom(learning_rate=0.1, num_iterations=1000, lambda_=0.1)
 model.fit(X_train_scaled, y_train)
+
+# Plot cost function over iterations
+plt.figure(figsize=(10, 6))
+plt.plot(model.cost_history)
+plt.xlabel('Iterations (per hundreds)')
+plt.ylabel('Cost')
+plt.title('Cost function over iterations')
+plt.show()
+
 # Evaluate the model
 y_pred_train = model.predict(X_train_scaled)
 y_pred_test = model.predict(X_test_scaled)
 print("Train Accuracy:", accuracy_score(y_train, y_pred_train))
 print("Test Accuracy:", accuracy_score(y_test, y_pred_test))
+
+# Plot Confusion Matrix
+cm = confusion_matrix(y_test, y_pred_test)
+sns.heatmap(cm, annot=True, fmt="d")
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+plt.show()
+
+# ROC Curve and AUC
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_test)
+roc_auc = auc(fpr, tpr)
+plt.figure()
+plt.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.show()
+
+# Precision-Recall Curve
+precision, recall, _ = precision_recall_curve(y_test, y_pred_test)
+average_precision = average_precision_score(y_test, y_pred_test)
+plt.plot(recall, precision, label='Average precision (AP = %0.2f)' % average_precision)
+plt.xlabel('Recall')
+plt.ylabel('Precision')
+plt.title('Precision-Recall curve')
+plt.legend()
+plt.show()
