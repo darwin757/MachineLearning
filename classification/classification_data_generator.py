@@ -41,7 +41,7 @@ def generate_tumor_dataset(n_samples=1000, n_features=20, n_informative=10, n_re
     df = pd.concat([df_features, df_target], axis=1)
     
     # Save the dataset to a CSV file
-    df.to_csv("tumor_classification_dataset2.csv", index=False)
+    df.to_csv("tumor_classification_dataset.csv", index=False)
     print("Dataset generated and saved to tumor_classification_dataset.csv with realistic feature names")
 
 # Generate and save the dataset
